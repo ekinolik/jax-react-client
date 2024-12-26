@@ -1,136 +1,167 @@
 # JAX React Client
 
-A React client library for the JAX (Options Delta Exposure) service.
+A React client for the JAX (Options Delta Exposure) service. This client provides a simple interface to interact with the JAX gRPC service.
 
 ## Installation
 
-Install the package directly from GitHub:
+You can install the package directly from the repository:
 
 ```bash
-npm install git+https://github.com/ekinolik/jax-react-client.git#main
+npm install git+https://github.com/yourusername/jax.git#main
 ```
 
-Or add it to your package.json:
-```json
-{
-  "dependencies": {
-    "@ekinolik/jax-react-client": "git+https://github.com/ekinolik/jax-react-client.git#main"
-  }
-}
-```
+## Requirements
 
-## Setup
-
-Install required dependencies:
-```bash
-npm install @improbable-eng/grpc-web google-protobuf
-```
+- Node.js >= 14.0.0
+- A running JAX gRPC service
 
 ## Usage
 
-### Using the React Hook
+### Basic Usage
 
-```tsx
+```typescript
+import { JaxClient } from '@ekinolik/jax-react-client';
+
+const client = new JaxClient({
+  host: 'localhost:50051'  // Your JAX gRPC service address
+});
+
+// Fetch DEX data
+const response = await client.getDex({
+  underlyingAsset: 'AAPL',
+  startStrikePrice: 150,
+  endStrikePrice: 200
+});
+
+// Access the data
+const spotPrice = response.getSpotPrice();
+const strikePrices = response.getStrikePricesMap();
+```
+
+### React Hook
+
+For React applications, we provide a convenient hook:
+
+```typescript
 import { useJaxClient } from '@ekinolik/jax-react-client';
 
-function App() {
-  const jaxClient = useJaxClient({
-    host: 'your-jax-service-url:50051', // Your JAX service URL and port
+function MyComponent() {
+  const jax = useJaxClient({
+    host: 'localhost:50051'
   });
 
-  const handleFetchData = async () => {
+  const fetchData = async () => {
     try {
-      const response = await jaxClient.getDex({
+      const response = await jax.getDex({
         underlyingAsset: 'AAPL',
-        startStrikePrice: 170,
-        endStrikePrice: 180,
+        startStrikePrice: 150,
+        endStrikePrice: 200
       });
-      console.log('DEX data:', response);
+      
+      // Handle the response
+      console.log('Spot price:', response.getSpotPrice());
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching DEX data:', error);
     }
   };
 
   return (
-    <button onClick={handleFetchData}>
+    <button onClick={fetchData}>
       Fetch DEX Data
     </button>
   );
 }
 ```
 
-### Using the DexViewer Component
+## Response Structure
 
-```tsx
-import { DexViewer } from '@ekinolik/jax-react-client';
+The response from `getDex` contains the following structure:
 
-function App() {
-  return (
-    <DexViewer
-      host="your-jax-service-url:50051" // Your JAX service URL and port
-      underlyingAsset="AAPL"
-      startStrike={170}
-      endStrike={180}
-    />
-  );
+```typescript
+interface DexResponse {
+  getSpotPrice(): number;
+  getStrikePricesMap(): Map<string, ExpirationDateMap>;
+}
+
+interface ExpirationDateMap {
+  getExpirationDatesMap(): Map<string, OptionTypeMap>;
+}
+
+interface OptionTypeMap {
+  getOptionTypesMap(): Map<string, DexValue>;
+}
+
+interface DexValue {
+  getValue(): number;
 }
 ```
 
-## Response Structure
+Example of accessing nested data:
 
-The response includes:
-- `spotPrice`: Current price of the underlying asset
-- `strikePrices`: Map of strike prices to expiration dates and option types, with DEX values
+```typescript
+const response = await client.getDex({ underlyingAsset: 'AAPL' });
 
-Example response:
-```json
-{
-  "spotPrice": 123.45,
-  "strikePrices": {
-    "170": {
-      "expirationDates": {
-        "2024-03-15": {
-          "optionTypes": {
-            "call": {
-              "value": 12345.67
-            },
-            "put": {
-              "value": -1234.56
-            }
-          }
-        }
-      }
-    }
+// Get spot price
+const spotPrice = response.getSpotPrice();
+
+// Get all strike prices
+const strikePrices = response.getStrikePricesMap();
+
+// For a specific strike price, get expiration dates
+const expDates = strikePrices.get('180')?.getExpirationDatesMap();
+
+// For a specific expiration date, get option types
+const optionTypes = expDates?.get('2024-03-15')?.getOptionTypesMap();
+
+// Get delta values for calls and puts
+const callDelta = optionTypes?.get('call')?.getValue();
+const putDelta = optionTypes?.get('put')?.getValue();
+```
+
+## Error Handling
+
+The client handles errors gracefully:
+
+- For invalid assets, the service returns an empty response (empty strike prices map)
+- Network or service errors are thrown and should be caught using try/catch
+- Invalid parameters (e.g., invalid strike price range) will result in an error
+
+Example error handling:
+
+```typescript
+try {
+  const response = await client.getDex({
+    underlyingAsset: 'AAPL',
+    startStrikePrice: 150,
+    endStrikePrice: 200
+  });
+  
+  if (Array.from(response.getStrikePricesMap().keys()).length === 0) {
+    console.log('No data available for the given parameters');
+    return;
   }
+  
+  // Process response...
+} catch (error) {
+  console.error('Error fetching DEX data:', error);
 }
 ```
 
 ## Development
 
-1. Clone the repository:
-```bash
-git clone https://github.com/ekinolik/jax-react-client.git
-```
+To build the client locally:
 
-2. Install dependencies:
 ```bash
 npm install
-```
-
-3. Generate protobuf files:
-```bash
-npm run generate
-```
-
-4. Build the package:
-```bash
 npm run build
 ```
 
-## Troubleshooting
+To run tests:
 
-1. **Connection Refused**: Verify that the JAX service is running and accessible at the specified URL and port.
+```bash
+# Unit tests
+npm test
 
-2. **Type Errors**: If you encounter TypeScript errors, make sure you've generated the protobuf files (`npm run generate`) before building.
-
-3. **gRPC Errors**: Check that your JAX service URL is correct and that the service is running. 
+# Integration tests (requires running JAX service)
+npm run test:integration
+``` 
