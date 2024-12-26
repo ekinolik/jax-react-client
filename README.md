@@ -4,10 +4,19 @@ A React client for the JAX (Options Delta Exposure) service. This client provide
 
 ## Installation
 
-You can install the package directly from the repository:
+Install the package directly from GitHub:
 
 ```bash
-npm install git+https://github.com/yourusername/jax.git#main
+npm install github:ekinolik/jax-react-client#main
+```
+
+Or add it to your package.json:
+```json
+{
+  "dependencies": {
+    "@ekinolik/jax-react-client": "github:ekinolik/jax-react-client#main"
+  }
+}
 ```
 
 ## Requirements
