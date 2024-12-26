@@ -10,7 +10,7 @@
   },
   "files": [
     "dist",
-    "src",
+    "src/generated",
     "package.json",
     "README.md",
     "tsconfig.json"
@@ -18,7 +18,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "generate": "protoc -I=./proto ./proto/dex/v1/dex.proto --js_out=import_style=commonjs:src/generated --grpc_out=grpc_js:src/generated --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin`",
-    "prepare": "npm run generate && npm run build",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run generate && npm run build",
     "test": "jest",
     "test:integration": "jest --config jest.integration.config.js",
     "pretest:integration": "npm run generate && npm run build"
