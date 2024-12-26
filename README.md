@@ -19,6 +19,35 @@ Or add it to your package.json:
 }
 ```
 
+## Development
+
+### Initial Setup
+
+When cloning the repository for development, make sure to initialize the submodules:
+
+```bash
+git clone https://github.com/ekinolik/jax-react-client.git
+cd jax-react-client
+git submodule update --init --recursive
+```
+
+### Building
+
+```bash
+npm install
+npm run build
+```
+
+### Generating Proto Files
+
+The proto files are included as a Git submodule. After cloning and initializing submodules:
+
+```bash
+npm run generate
+```
+
+This will generate the necessary gRPC client code from the proto definitions.
+
 ## Requirements
 
 - Node.js >= 14.0.0
