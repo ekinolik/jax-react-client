@@ -1,6 +1,6 @@
-import { grpc } from '@improbable-eng/grpc-web';
-import { DexServiceClient } from './generated/dex/v1/DexServiceClientPb';
+import * as grpc from '@grpc/grpc-js';
 import { GetDexRequest, GetDexResponse } from './generated/dex/v1/dex_pb';
+import { DexServiceClient } from './generated/dex/v1/dex_grpc_pb';
 
 export interface DexOptions {
   host: string;
@@ -13,13 +13,13 @@ export interface GetDexParams {
 }
 
 export class JaxClient {
-  private client: DexServiceClient;
+  private client: InstanceType<typeof DexServiceClient>;
 
   constructor(options: DexOptions) {
-    this.client = new DexServiceClient(options.host);
+    this.client = new DexServiceClient(options.host, grpc.credentials.createInsecure());
   }
 
-  getDex(params: GetDexParams): Promise<GetDexResponse> {
+  async getDex(params: GetDexParams): Promise<GetDexResponse> {
     const request = new GetDexRequest();
     request.setUnderlyingAsset(params.underlyingAsset);
     
@@ -30,7 +30,15 @@ export class JaxClient {
       request.setEndStrikePrice(params.endStrikePrice);
     }
 
-    return this.client.getDex(request);
+    return new Promise((resolve, reject) => {
+      this.client.getDex(request, (err: Error | null, response: GetDexResponse) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(response);
+      });
+    });
   }
 }
 

@@ -1,28 +1,29 @@
 {
   "name": "@ekinolik/jax-react-client",
   "version": "1.0.0",
-  "description": "React client for JAX (Options Delta Exposure) service",
+  "description": "React client for JAX API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "browser": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build",
-    "generate": "protoc -I=../../api/proto ../../api/proto/dex/v1/dex.proto --js_out=import_style=commonjs:src/generated --grpc-web_out=import_style=commonjs+dts,mode=grpcwebtext:src/generated"
+    "generate": "protoc -I=../../api/proto ../../api/proto/dex/v1/dex.proto --js_out=import_style=commonjs:src/generated --grpc_out=grpc_js:src/generated --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin`",
+    "test": "jest",
+    "test:integration": "jest --config jest.integration.config.js",
+    "pretest:integration": "npm run generate && npm run build"
   },
   "dependencies": {
-    "@improbable-eng/grpc-web": "^0.15.0",
+    "@grpc/grpc-js": "^1.9.13",
     "google-protobuf": "^3.21.2",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.15.12",
-    "@types/node": "^20.11.24",
-    "@types/react": "^18.2.61",
-    "@types/react-dom": "^18.2.19",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.46",
+    "grpc-tools": "^1.12.4",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.3.3"
-  },
-  "peerDependencies": {
-    "react": ">=16.8.0"
   }
 }
