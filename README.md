@@ -65,15 +65,26 @@ const client = new JaxClient({
 });
 
 // Fetch DEX data
-const response = await client.getDex({
+const dexResponse = await client.getDex({
   underlyingAsset: 'AAPL',
   startStrikePrice: 150,
   endStrikePrice: 200
 });
 
-// Access the data
-const spotPrice = response.getSpotPrice();
-const strikePrices = response.getStrikePricesMap();
+// Access DEX data
+const spotPrice = dexResponse.getSpotPrice();
+const strikePrices = dexResponse.getStrikePricesMap();
+
+// Fetch last trade data
+const lastTradeResponse = await client.getLastTrade({
+  ticker: 'AAPL'
+});
+
+// Access last trade data
+const price = lastTradeResponse.getPrice();
+const size = lastTradeResponse.getSize();
+const timestamp = new Date(lastTradeResponse.getTimestamp() * 1000);
+const exchange = lastTradeResponse.getExchange();
 ```
 
 ### React Hook
@@ -88,7 +99,7 @@ function MyComponent() {
     host: 'localhost:50051'
   });
 
-  const fetchData = async () => {
+  const fetchDexData = async () => {
     try {
       const response = await jax.getDex({
         underlyingAsset: 'AAPL',
@@ -103,15 +114,39 @@ function MyComponent() {
     }
   };
 
+  const fetchLastTrade = async () => {
+    try {
+      const response = await jax.getLastTrade({
+        ticker: 'AAPL'
+      });
+      
+      console.log('Last trade:', {
+        price: response.getPrice(),
+        size: response.getSize(),
+        timestamp: new Date(response.getTimestamp() * 1000),
+        exchange: response.getExchange()
+      });
+    } catch (error) {
+      console.error('Error fetching last trade:', error);
+    }
+  };
+
   return (
-    <button onClick={fetchData}>
-      Fetch DEX Data
-    </button>
+    <div>
+      <button onClick={fetchDexData}>
+        Fetch DEX Data
+      </button>
+      <button onClick={fetchLastTrade}>
+        Fetch Last Trade
+      </button>
+    </div>
   );
 }
 ```
 
-## Response Structure
+## Response Structures
+
+### DEX Response
 
 The response from `getDex` contains the following structure:
 
@@ -134,54 +169,36 @@ interface DexValue {
 }
 ```
 
-Example of accessing nested data:
+### Last Trade Response
+
+The response from `getLastTrade` contains the following structure:
 
 ```typescript
-const response = await client.getDex({ underlyingAsset: 'AAPL' });
-
-// Get spot price
-const spotPrice = response.getSpotPrice();
-
-// Get all strike prices
-const strikePrices = response.getStrikePricesMap();
-
-// For a specific strike price, get expiration dates
-const expDates = strikePrices.get('180')?.getExpirationDatesMap();
-
-// For a specific expiration date, get option types
-const optionTypes = expDates?.get('2024-03-15')?.getOptionTypesMap();
-
-// Get delta values for calls and puts
-const callDelta = optionTypes?.get('call')?.getValue();
-const putDelta = optionTypes?.get('put')?.getValue();
+interface LastTradeResponse {
+  getPrice(): number;      // Last trade price
+  getSize(): number;       // Last trade size
+  getTimestamp(): number;  // Unix timestamp in seconds
+  getExchange(): string;   // Exchange identifier
+}
 ```
 
 ## Error Handling
 
 The client handles errors gracefully:
 
-- For invalid assets, the service returns an empty response (empty strike prices map)
 - Network or service errors are thrown and should be caught using try/catch
-- Invalid parameters (e.g., invalid strike price range) will result in an error
+- Invalid parameters (e.g., invalid ticker) will result in an error
 
 Example error handling:
 
 ```typescript
 try {
-  const response = await client.getDex({
-    underlyingAsset: 'AAPL',
-    startStrikePrice: 150,
-    endStrikePrice: 200
+  const response = await client.getLastTrade({
+    ticker: 'AAPL'
   });
-  
-  if (Array.from(response.getStrikePricesMap().keys()).length === 0) {
-    console.log('No data available for the given parameters');
-    return;
-  }
-  
   // Process response...
 } catch (error) {
-  console.error('Error fetching DEX data:', error);
+  console.error('Error fetching last trade:', error);
 }
 ```
 
@@ -202,31 +219,18 @@ npm test
 
 # Integration tests (requires running JAX service)
 npm run test:integration
-``` 
-
+```
 
 ## Caching
 
-The client implements a two-level caching strategy to minimize API calls and improve performance:
+The client interacts with the server's caching mechanism:
 
-### Server-Side Cache
-- The server maintains a 15-minute cache for each underlying asset
-- All strike prices for an asset are cached, regardless of requested ranges
-- Cache entries include spot price and full option chain data
-- Cache expiration time is communicated to clients via gRPC metadata
+### DEX Data
+- Server caches DEX data for 15 minutes by default
+- Cache duration is configurable via server's `JAX_DEX_CACHE_TTL` environment variable
+- Cache expiration time is communicated via gRPC metadata
 
-### Client-Side Cache
-- Caches responses based on underlying asset AND strike price range
-- Cache duration automatically syncs with server's remaining TTL
-- Different strike price ranges for the same asset are cached separately
-- Default TTL is 15 minutes if server doesn't provide expiration time
-- Cache is cleared on page refresh (in-memory cache)
-
-Example of how caching works:
-```typescript
-// First request - hits server, caches result
-await client.getDex({ underlyingAsset: 'SPY', startStrikePrice: 400, endStrikePrice: 450 });
-// Second request with same parameters - returns cached data
-await client.getDex({ underlyingAsset: 'SPY', startStrikePrice: 400, endStrikePrice: 450 });
-// Different strike range - hits server but may use server's cache
-await client.getDex({ underlyingAsset: 'SPY', startStrikePrice: 450, endStrikePrice: 500 });```
+### Last Trade Data
+- Server caches last trade data for 1 second by default
+- Cache duration is configurable via server's `JAX_MARKET_CACHE_TTL` environment variable
+- No client-side caching for last trade data to ensure freshness
