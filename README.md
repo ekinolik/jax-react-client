@@ -203,3 +203,30 @@ npm test
 # Integration tests (requires running JAX service)
 npm run test:integration
 ``` 
+
+
+## Caching
+
+The client implements a two-level caching strategy to minimize API calls and improve performance:
+
+### Server-Side Cache
+- The server maintains a 15-minute cache for each underlying asset
+- All strike prices for an asset are cached, regardless of requested ranges
+- Cache entries include spot price and full option chain data
+- Cache expiration time is communicated to clients via gRPC metadata
+
+### Client-Side Cache
+- Caches responses based on underlying asset AND strike price range
+- Cache duration automatically syncs with server's remaining TTL
+- Different strike price ranges for the same asset are cached separately
+- Default TTL is 15 minutes if server doesn't provide expiration time
+- Cache is cleared on page refresh (in-memory cache)
+
+Example of how caching works:
+```typescript
+// First request - hits server, caches result
+await client.getDex({ underlyingAsset: 'SPY', startStrikePrice: 400, endStrikePrice: 450 });
+// Second request with same parameters - returns cached data
+await client.getDex({ underlyingAsset: 'SPY', startStrikePrice: 400, endStrikePrice: 450 });
+// Different strike range - hits server but may use server's cache
+await client.getDex({ underlyingAsset: 'SPY', startStrikePrice: 450, endStrikePrice: 500 });```
