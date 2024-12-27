@@ -1,9 +1,11 @@
 import * as grpc from '@grpc/grpc-js';
 import { GetDexRequest, GetDexResponse } from './generated/dex/v1/dex_pb';
+import { GetLastTradeRequest, GetLastTradeResponse } from './generated/market/v1/market_pb';
 import { DexServiceClient } from './generated/dex/v1/dex_grpc_pb';
+import { MarketServiceClient } from './generated/market/v1/market_grpc_pb';
 import { DexCache } from './cache/dexCache';
 
-export interface DexOptions {
+export interface ClientOptions {
   host: string;
 }
 
@@ -13,13 +15,19 @@ export interface GetDexParams {
   endStrikePrice?: number;
 }
 
-export class JaxClient {
-  private client: InstanceType<typeof DexServiceClient>;
-  private cache: DexCache;
+export interface GetLastTradeParams {
+  ticker: string;
+}
 
-  constructor(options: DexOptions) {
-    this.client = new DexServiceClient(options.host, grpc.credentials.createInsecure());
-    this.cache = new DexCache();
+export class JaxClient {
+  private dexClient: InstanceType<typeof DexServiceClient>;
+  private marketClient: InstanceType<typeof MarketServiceClient>;
+  private dexCache: DexCache;
+
+  constructor(options: ClientOptions) {
+    this.dexClient = new DexServiceClient(options.host, grpc.credentials.createInsecure());
+    this.marketClient = new MarketServiceClient(options.host, grpc.credentials.createInsecure());
+    this.dexCache = new DexCache();
   }
 
   async getDex(params: GetDexParams): Promise<GetDexResponse> {
@@ -34,7 +42,7 @@ export class JaxClient {
     }
 
     // Check cache first with strike range
-    const cachedResponse = this.cache.get(
+    const cachedResponse = this.dexCache.get(
       params.underlyingAsset, 
       params.startStrikePrice, 
       params.endStrikePrice
@@ -45,7 +53,7 @@ export class JaxClient {
 
     // If not in cache, make the API call
     return new Promise((resolve, reject) => {
-      this.client.getDex(request, {}, (err, response, details) => {
+      this.dexClient.getDex(request, {}, (err, response, details) => {
         if (err) {
           reject(err);
           return;
@@ -55,7 +63,7 @@ export class JaxClient {
         const expiresAt = details?.metadata?.get('cache-expires-at')?.[0];
         if (expiresAt) {
           const ttl = (parseInt(expiresAt) * 1000) - Date.now();
-          this.cache.set(
+          this.dexCache.set(
             params.underlyingAsset, 
             response, 
             ttl, 
@@ -63,7 +71,7 @@ export class JaxClient {
             params.endStrikePrice
           );
         } else {
-          this.cache.set(
+          this.dexCache.set(
             params.underlyingAsset, 
             response, 
             undefined, 
@@ -75,13 +83,29 @@ export class JaxClient {
       });
     });
   }
+
+  async getLastTrade(params: GetLastTradeParams): Promise<GetLastTradeResponse> {
+    const request = new GetLastTradeRequest();
+    request.setTicker(params.ticker);
+
+    return new Promise((resolve, reject) => {
+      this.marketClient.getLastTrade(request, {}, (err, response) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(response);
+      });
+    });
+  }
 }
 
 // React hook for using the JAX client
-export function useJaxClient(options: DexOptions) {
+export function useJaxClient(options: ClientOptions) {
   const client = new JaxClient(options);
 
   return {
     getDex: (params: GetDexParams) => client.getDex(params),
+    getLastTrade: (params: GetLastTradeParams) => client.getLastTrade(params),
   };
 } 

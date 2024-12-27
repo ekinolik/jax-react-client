@@ -9,53 +9,80 @@ describe('JaxClient Integration Tests', () => {
     });
   });
 
-  it('should fetch DEX data for AAPL', async () => {
-    const response = await client.getDex({
-      underlyingAsset: 'AAPL',
-      startStrikePrice: 150,
-      endStrikePrice: 200
+  describe('DEX API', () => {
+    it('should fetch DEX data for AAPL', async () => {
+      const response = await client.getDex({
+        underlyingAsset: 'AAPL',
+        startStrikePrice: 150,
+        endStrikePrice: 200
+      });
+
+      expect(response).toBeDefined();
+      expect(response.getSpotPrice()).toBeGreaterThan(0);
+      
+      const strikePrices = response.getStrikePricesMap();
+      const strikePriceKeys = Array.from(strikePrices.keys());
+      expect(strikePriceKeys.length).toBeGreaterThan(0);
+      
+      // Get first strike price entry
+      const firstStrike = strikePriceKeys[0];
+      const expDates = strikePrices.get(firstStrike)?.getExpirationDatesMap();
+      expect(expDates).toBeDefined();
+      const expDateKeys = Array.from(expDates!.keys());
+      expect(expDateKeys.length).toBeGreaterThan(0);
+      
+      // Get first expiration date entry
+      const firstExpDate = expDateKeys[0];
+      const optionTypes = expDates!.get(firstExpDate)?.getOptionTypesMap();
+      expect(optionTypes).toBeDefined();
+      expect(Array.from(optionTypes!.keys()).includes('call')).toBe(true);
+      expect(Array.from(optionTypes!.keys()).includes('put')).toBe(true);
+      
+      // Verify delta values exist (we don't make assumptions about their range)
+      const callDelta = optionTypes!.get('call')?.getValue();
+      const putDelta = optionTypes!.get('put')?.getValue();
+      expect(callDelta).toBeDefined();
+      expect(putDelta).toBeDefined();
+      expect(typeof callDelta).toBe('number');
+      expect(typeof putDelta).toBe('number');
+    }, 30000); // Increase timeout for real API call
+
+    it('should handle invalid asset requests', async () => {
+      const response = await client.getDex({
+        underlyingAsset: 'INVALID',
+        startStrikePrice: 150,
+        endStrikePrice: 200
+      });
+
+      // Verify that we get an empty response for invalid assets
+      expect(response).toBeDefined();
+      const strikePriceKeys = Array.from(response.getStrikePricesMap().keys());
+      expect(strikePriceKeys.length).toBe(0);
     });
+  });
 
-    expect(response).toBeDefined();
-    expect(response.getSpotPrice()).toBeGreaterThan(0);
-    
-    const strikePrices = response.getStrikePricesMap();
-    const strikePriceKeys = Array.from(strikePrices.keys());
-    expect(strikePriceKeys.length).toBeGreaterThan(0);
-    
-    // Get first strike price entry
-    const firstStrike = strikePriceKeys[0];
-    const expDates = strikePrices.get(firstStrike)?.getExpirationDatesMap();
-    expect(expDates).toBeDefined();
-    const expDateKeys = Array.from(expDates!.keys());
-    expect(expDateKeys.length).toBeGreaterThan(0);
-    
-    // Get first expiration date entry
-    const firstExpDate = expDateKeys[0];
-    const optionTypes = expDates!.get(firstExpDate)?.getOptionTypesMap();
-    expect(optionTypes).toBeDefined();
-    expect(Array.from(optionTypes!.keys()).includes('call')).toBe(true);
-    expect(Array.from(optionTypes!.keys()).includes('put')).toBe(true);
-    
-    // Verify delta values exist (we don't make assumptions about their range)
-    const callDelta = optionTypes!.get('call')?.getValue();
-    const putDelta = optionTypes!.get('put')?.getValue();
-    expect(callDelta).toBeDefined();
-    expect(putDelta).toBeDefined();
-    expect(typeof callDelta).toBe('number');
-    expect(typeof putDelta).toBe('number');
-  }, 30000); // Increase timeout for real API call
+  describe('Last Trade API', () => {
+    it('should fetch last trade data for AAPL', async () => {
+      const response = await client.getLastTrade({
+        ticker: 'AAPL'
+      });
 
-  it('should handle invalid asset requests', async () => {
-    const response = await client.getDex({
-      underlyingAsset: 'INVALID',
-      startStrikePrice: 150,
-      endStrikePrice: 200
+      expect(response).toBeDefined();
+      expect(response.getPrice()).toBeGreaterThan(0);
+      expect(response.getSize()).toBeGreaterThan(0);
+      expect(response.getTimestamp()).toBeGreaterThan(0);
+      expect(response.getExchange()).toBeDefined();
+    }, 30000); // Increase timeout for real API call
+
+    it('should handle invalid ticker requests', async () => {
+      try {
+        await client.getLastTrade({
+          ticker: 'INVALID_TICKER'
+        });
+        fail('Should have thrown an error for invalid ticker');
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
     });
-
-    // Verify that we get an empty response for invalid assets
-    expect(response).toBeDefined();
-    const strikePriceKeys = Array.from(response.getStrikePricesMap().keys());
-    expect(strikePriceKeys.length).toBe(0);
   });
 }); 
