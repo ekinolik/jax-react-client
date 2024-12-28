@@ -47,6 +47,42 @@ describe('JaxClient Integration Tests', () => {
       expect(typeof putDelta).toBe('number');
     }, 30000); // Increase timeout for real API call
 
+    it('should fetch DEX data by number of strikes for AAPL', async () => {
+      const response = await client.getDexByStrikes({
+        underlyingAsset: 'AAPL',
+        numStrikes: 5
+      });
+
+      expect(response).toBeDefined();
+      expect(response.getSpotPrice()).toBeGreaterThan(0);
+      
+      const strikePrices = response.getStrikePricesMap();
+      const strikePriceKeys = Array.from(strikePrices.keys());
+      expect(strikePriceKeys.length).toBe(5); // Should have exactly 5 strikes
+      
+      // Get first strike price entry
+      const firstStrike = strikePriceKeys[0];
+      const expDates = strikePrices.get(firstStrike)?.getExpirationDatesMap();
+      expect(expDates).toBeDefined();
+      const expDateKeys = Array.from(expDates!.keys());
+      expect(expDateKeys.length).toBeGreaterThan(0);
+      
+      // Get first expiration date entry
+      const firstExpDate = expDateKeys[0];
+      const optionTypes = expDates!.get(firstExpDate)?.getOptionTypesMap();
+      expect(optionTypes).toBeDefined();
+      expect(Array.from(optionTypes!.keys()).includes('call')).toBe(true);
+      expect(Array.from(optionTypes!.keys()).includes('put')).toBe(true);
+      
+      // Verify delta values exist (we don't make assumptions about their range)
+      const callDelta = optionTypes!.get('call')?.getValue();
+      const putDelta = optionTypes!.get('put')?.getValue();
+      expect(callDelta).toBeDefined();
+      expect(putDelta).toBeDefined();
+      expect(typeof callDelta).toBe('number');
+      expect(typeof putDelta).toBe('number');
+    }, 30000); // Increase timeout for real API call
+
     it('should handle invalid asset requests', async () => {
       const response = await client.getDex({
         underlyingAsset: 'INVALID',
@@ -58,6 +94,18 @@ describe('JaxClient Integration Tests', () => {
       expect(response).toBeDefined();
       const strikePriceKeys = Array.from(response.getStrikePricesMap().keys());
       expect(strikePriceKeys.length).toBe(0);
+    });
+
+    it('should handle invalid number of strikes', async () => {
+      try {
+        await client.getDexByStrikes({
+          underlyingAsset: 'AAPL',
+          numStrikes: 4 // Even number should fail
+        });
+        fail('Should have thrown an error for even number of strikes');
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
     });
   });
 

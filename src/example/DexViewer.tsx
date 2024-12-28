@@ -7,6 +7,7 @@ interface DexViewerProps {
   underlyingAsset: string;
   startStrike?: number;
   endStrike?: number;
+  numStrikes?: number;
 }
 
 export const DexViewer: React.FC<DexViewerProps> = ({
@@ -14,6 +15,7 @@ export const DexViewer: React.FC<DexViewerProps> = ({
   underlyingAsset,
   startStrike,
   endStrike,
+  numStrikes,
 }) => {
   const [data, setData] = useState<GetDexResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,11 +29,19 @@ export const DexViewer: React.FC<DexViewerProps> = ({
       setError(null);
 
       try {
-        const response = await jaxClient.getDex({
-          underlyingAsset,
-          startStrikePrice: startStrike,
-          endStrikePrice: endStrike,
-        });
+        let response;
+        if (numStrikes !== undefined) {
+          response = await jaxClient.getDexByStrikes({
+            underlyingAsset,
+            numStrikes,
+          });
+        } else {
+          response = await jaxClient.getDex({
+            underlyingAsset,
+            startStrikePrice: startStrike,
+            endStrikePrice: endStrike,
+          });
+        }
         setData(response);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -41,7 +51,7 @@ export const DexViewer: React.FC<DexViewerProps> = ({
     };
 
     fetchData();
-  }, [jaxClient, underlyingAsset, startStrike, endStrike]);
+  }, [jaxClient, underlyingAsset, startStrike, endStrike, numStrikes]);
 
   if (loading) {
     return <div>Loading...</div>;

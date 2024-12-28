@@ -75,6 +75,12 @@ const dexResponse = await client.getDex({
 const spotPrice = dexResponse.getSpotPrice();
 const strikePrices = dexResponse.getStrikePricesMap();
 
+// Fetch DEX data by number of strikes
+const dexByStrikesResponse = await client.getDexByStrikes({
+  underlyingAsset: 'AAPL',
+  numStrikes: 5  // Returns 5 strikes centered around spot price
+});
+
 // Fetch last trade data
 const lastTradeResponse = await client.getLastTrade({
   ticker: 'AAPL'
@@ -114,6 +120,20 @@ function MyComponent() {
     }
   };
 
+  const fetchDexByStrikes = async () => {
+    try {
+      const response = await jax.getDexByStrikes({
+        underlyingAsset: 'AAPL',
+        numStrikes: 5  // Returns 5 strikes centered around spot price
+      });
+      
+      // Handle the response
+      console.log('Spot price:', response.getSpotPrice());
+    } catch (error) {
+      console.error('Error fetching DEX data:', error);
+    }
+  };
+
   const fetchLastTrade = async () => {
     try {
       const response = await jax.getLastTrade({
@@ -136,6 +156,9 @@ function MyComponent() {
       <button onClick={fetchDexData}>
         Fetch DEX Data
       </button>
+      <button onClick={fetchDexByStrikes}>
+        Fetch DEX Data by Strikes
+      </button>
       <button onClick={fetchLastTrade}>
         Fetch Last Trade
       </button>
@@ -148,7 +171,7 @@ function MyComponent() {
 
 ### DEX Response
 
-The response from `getDex` contains the following structure:
+The response from `getDex` and `getDexByStrikes` contains the following structure:
 
 ```typescript
 interface DexResponse {
@@ -188,6 +211,7 @@ The client handles errors gracefully:
 
 - Network or service errors are thrown and should be caught using try/catch
 - Invalid parameters (e.g., invalid ticker) will result in an error
+- For getDexByStrikes, if fewer strikes are available than requested, it returns all available strikes
 
 Example error handling:
 

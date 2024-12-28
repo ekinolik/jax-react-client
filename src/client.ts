@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
-import { GetDexRequest, GetDexResponse } from './generated/dex/v1/dex_pb';
+import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/dex/v1/dex_pb';
 import { GetLastTradeRequest, GetLastTradeResponse } from './generated/market/v1/market_pb';
 import { DexServiceClient } from './generated/dex/v1/dex_grpc_pb';
 import { MarketServiceClient } from './generated/market/v1/market_grpc_pb';
@@ -17,6 +17,11 @@ export interface GetDexParams {
 
 export interface GetLastTradeParams {
   ticker: string;
+}
+
+export interface GetDexByStrikesParams {
+  underlyingAsset: string;
+  numStrikes: number;
 }
 
 export class JaxClient {
@@ -98,6 +103,38 @@ export class JaxClient {
       });
     });
   }
+
+  async getDexByStrikes(params: GetDexByStrikesParams): Promise<GetDexResponse> {
+    const request = new GetDexByStrikesRequest();
+    request.setUnderlyingAsset(params.underlyingAsset);
+    request.setNumStrikes(params.numStrikes);
+
+    // Check cache first
+    const cachedResponse = this.dexCache.get(params.underlyingAsset);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // If not in cache, make the API call
+    return new Promise((resolve, reject) => {
+      this.dexClient.getDexByStrikes(request, {}, (err, response, details) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        
+        // Update cache
+        const expiresAt = details?.metadata?.get('cache-expires-at')?.[0];
+        if (expiresAt) {
+          const ttl = (parseInt(expiresAt) * 1000) - Date.now();
+          this.dexCache.set(params.underlyingAsset, response, ttl);
+        } else {
+          this.dexCache.set(params.underlyingAsset, response);
+        }
+        resolve(response);
+      });
+    });
+  }
 }
 
 // React hook for using the JAX client
@@ -106,6 +143,7 @@ export function useJaxClient(options: ClientOptions) {
 
   return {
     getDex: (params: GetDexParams) => client.getDex(params),
+    getDexByStrikes: (params: GetDexByStrikesParams) => client.getDexByStrikes(params),
     getLastTrade: (params: GetLastTradeParams) => client.getLastTrade(params),
   };
 } 

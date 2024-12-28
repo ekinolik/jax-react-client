@@ -1,24 +1,27 @@
-import * as jspb from 'google-protobuf'
+// package: dex.v1
+// file: dex/v1/dex.proto
 
-
+import * as jspb from "google-protobuf";
 
 export class GetDexRequest extends jspb.Message {
   getUnderlyingAsset(): string;
-  setUnderlyingAsset(value: string): GetDexRequest;
+  setUnderlyingAsset(value: string): void;
 
-  getStartStrikePrice(): number;
-  setStartStrikePrice(value: number): GetDexRequest;
   hasStartStrikePrice(): boolean;
-  clearStartStrikePrice(): GetDexRequest;
+  clearStartStrikePrice(): void;
+  getStartStrikePrice(): number;
+  setStartStrikePrice(value: number): void;
 
-  getEndStrikePrice(): number;
-  setEndStrikePrice(value: number): GetDexRequest;
   hasEndStrikePrice(): boolean;
-  clearEndStrikePrice(): GetDexRequest;
+  clearEndStrikePrice(): void;
+  getEndStrikePrice(): number;
+  setEndStrikePrice(value: number): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetDexRequest.AsObject;
   static toObject(includeInstance: boolean, msg: GetDexRequest): GetDexRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
   static serializeBinaryToWriter(message: GetDexRequest, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): GetDexRequest;
   static deserializeBinaryFromReader(message: GetDexRequest, reader: jspb.BinaryReader): GetDexRequest;
@@ -27,31 +30,46 @@ export class GetDexRequest extends jspb.Message {
 export namespace GetDexRequest {
   export type AsObject = {
     underlyingAsset: string,
-    startStrikePrice?: number,
-    endStrikePrice?: number,
+    startStrikePrice: number,
+    endStrikePrice: number,
   }
+}
 
-  export enum StartStrikePriceCase { 
-    _START_STRIKE_PRICE_NOT_SET = 0,
-    START_STRIKE_PRICE = 2,
-  }
+export class GetDexByStrikesRequest extends jspb.Message {
+  getUnderlyingAsset(): string;
+  setUnderlyingAsset(value: string): void;
 
-  export enum EndStrikePriceCase { 
-    _END_STRIKE_PRICE_NOT_SET = 0,
-    END_STRIKE_PRICE = 3,
+  getNumStrikes(): number;
+  setNumStrikes(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetDexByStrikesRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetDexByStrikesRequest): GetDexByStrikesRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: GetDexByStrikesRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetDexByStrikesRequest;
+  static deserializeBinaryFromReader(message: GetDexByStrikesRequest, reader: jspb.BinaryReader): GetDexByStrikesRequest;
+}
+
+export namespace GetDexByStrikesRequest {
+  export type AsObject = {
+    underlyingAsset: string,
+    numStrikes: number,
   }
 }
 
 export class GetDexResponse extends jspb.Message {
   getSpotPrice(): number;
-  setSpotPrice(value: number): GetDexResponse;
+  setSpotPrice(value: number): void;
 
   getStrikePricesMap(): jspb.Map<string, ExpirationDateMap>;
-  clearStrikePricesMap(): GetDexResponse;
-
+  clearStrikePricesMap(): void;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetDexResponse.AsObject;
   static toObject(includeInstance: boolean, msg: GetDexResponse): GetDexResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
   static serializeBinaryToWriter(message: GetDexResponse, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): GetDexResponse;
   static deserializeBinaryFromReader(message: GetDexResponse, reader: jspb.BinaryReader): GetDexResponse;
@@ -66,11 +84,12 @@ export namespace GetDexResponse {
 
 export class ExpirationDateMap extends jspb.Message {
   getExpirationDatesMap(): jspb.Map<string, OptionTypeMap>;
-  clearExpirationDatesMap(): ExpirationDateMap;
-
+  clearExpirationDatesMap(): void;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ExpirationDateMap.AsObject;
   static toObject(includeInstance: boolean, msg: ExpirationDateMap): ExpirationDateMap.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
   static serializeBinaryToWriter(message: ExpirationDateMap, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): ExpirationDateMap;
   static deserializeBinaryFromReader(message: ExpirationDateMap, reader: jspb.BinaryReader): ExpirationDateMap;
@@ -84,11 +103,12 @@ export namespace ExpirationDateMap {
 
 export class OptionTypeMap extends jspb.Message {
   getOptionTypesMap(): jspb.Map<string, DexValue>;
-  clearOptionTypesMap(): OptionTypeMap;
-
+  clearOptionTypesMap(): void;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): OptionTypeMap.AsObject;
   static toObject(includeInstance: boolean, msg: OptionTypeMap): OptionTypeMap.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
   static serializeBinaryToWriter(message: OptionTypeMap, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): OptionTypeMap;
   static deserializeBinaryFromReader(message: OptionTypeMap, reader: jspb.BinaryReader): OptionTypeMap;
@@ -102,11 +122,13 @@ export namespace OptionTypeMap {
 
 export class DexValue extends jspb.Message {
   getValue(): number;
-  setValue(value: number): DexValue;
+  setValue(value: number): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): DexValue.AsObject;
   static toObject(includeInstance: boolean, msg: DexValue): DexValue.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
   static serializeBinaryToWriter(message: DexValue, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): DexValue;
   static deserializeBinaryFromReader(message: DexValue, reader: jspb.BinaryReader): DexValue;
