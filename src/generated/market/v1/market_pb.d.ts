@@ -1,4 +1,4 @@
-// package: market.v1
+// package: jax.v1
 // file: market/v1/market.proto
 
 import * as jspb from "google-protobuf";

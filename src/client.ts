@@ -1,7 +1,7 @@
 import * as grpc from '@grpc/grpc-js';
 import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/dex/v1/dex_pb';
 import { GetLastTradeRequest, GetLastTradeResponse } from './generated/market/v1/market_pb';
-import { DexServiceClient } from './generated/dex/v1/dex_grpc_pb';
+import { OptionServiceClient } from './generated/dex/v1/dex_grpc_pb';
 import { MarketServiceClient } from './generated/market/v1/market_grpc_pb';
 
 export interface ClientOptions {
@@ -24,11 +24,11 @@ export interface GetDexByStrikesParams {
 }
 
 export class JaxClient {
-  private dexClient: InstanceType<typeof DexServiceClient>;
+  private optionClient: InstanceType<typeof OptionServiceClient>;
   private marketClient: InstanceType<typeof MarketServiceClient>;
 
   constructor(options: ClientOptions) {
-    this.dexClient = new DexServiceClient(options.host, grpc.credentials.createInsecure());
+    this.optionClient = new OptionServiceClient(options.host, grpc.credentials.createInsecure());
     this.marketClient = new MarketServiceClient(options.host, grpc.credentials.createInsecure());
   }
 
@@ -44,7 +44,7 @@ export class JaxClient {
     }
 
     return new Promise((resolve, reject) => {
-      this.dexClient.getDex(request, {}, (err, response) => {
+      this.optionClient.getDex(request, {}, (err, response) => {
         if (err) {
           reject(err);
           return;
@@ -75,7 +75,7 @@ export class JaxClient {
     request.setNumStrikes(params.numStrikes);
 
     return new Promise((resolve, reject) => {
-      this.dexClient.getDexByStrikes(request, {}, (err, response) => {
+      this.optionClient.getDexByStrikes(request, {}, (err, response) => {
         if (err) {
           reject(err);
           return;
