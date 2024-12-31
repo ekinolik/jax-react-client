@@ -1,4 +1,4 @@
-// source: dex/v1/dex.proto
+// source: option/v1/dex.proto
 /**
  * @fileoverview
  * @enhanceable

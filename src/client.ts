@@ -1,7 +1,7 @@
 import * as grpc from '@grpc/grpc-js';
-import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/dex/v1/dex_pb';
+import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/option/v1/dex_pb';
 import { GetLastTradeRequest, GetLastTradeResponse } from './generated/market/v1/market_pb';
-import { OptionServiceClient } from './generated/dex/v1/dex_grpc_pb';
+import { OptionServiceClient } from './generated/option/v1/dex_grpc_pb';
 import { MarketServiceClient } from './generated/market/v1/market_grpc_pb';
 
 export interface ClientOptions {

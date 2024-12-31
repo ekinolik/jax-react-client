@@ -12,7 +12,7 @@ protoc \
   --js_out=import_style=commonjs:src/generated \
   --grpc_out=grpc_js:src/generated \
   -I ../../api/proto \
-  ../../api/proto/dex/v1/dex.proto \
+  ../../api/proto/option/v1/dex.proto \
   ../../api/proto/market/v1/market.proto
 
 # Generate TypeScript definitions
@@ -20,5 +20,5 @@ protoc \
   --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts \
   --ts_out=src/generated \
   -I ../../api/proto \
-  ../../api/proto/dex/v1/dex.proto \
+  ../../api/proto/option/v1/dex.proto \
   ../../api/proto/market/v1/market.proto 

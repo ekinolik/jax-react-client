@@ -1,5 +1,5 @@
 // package: jax.v1
-// file: dex/v1/dex.proto
+// file: option/v1/dex.proto
 
 import * as jspb from "google-protobuf";
 
