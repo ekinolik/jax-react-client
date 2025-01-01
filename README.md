@@ -1,6 +1,6 @@
 # JAX React Client
 
-A React client for the JAX (Options Delta Exposure) service. This client provides a simple interface to interact with the JAX gRPC service.
+A React client for the JAX (Options Delta and Gamma Exposure) service. This client provides a simple interface to interact with the JAX gRPC service.
 
 ## Installation
 
@@ -81,6 +81,23 @@ const dexByStrikesResponse = await client.getDexByStrikes({
   numStrikes: 5  // Returns 5 strikes centered around spot price
 });
 
+// Fetch GEX data
+const gexResponse = await client.getGex({
+  underlyingAsset: 'AAPL',
+  startStrikePrice: 150,
+  endStrikePrice: 200
+});
+
+// Access GEX data
+const gexSpotPrice = gexResponse.getSpotPrice();
+const gexStrikePrices = gexResponse.getStrikePricesMap();
+
+// Fetch GEX data by number of strikes
+const gexByStrikesResponse = await client.getGexByStrikes({
+  underlyingAsset: 'AAPL',
+  numStrikes: 5  // Returns 5 strikes centered around spot price
+});
+
 // Fetch last trade data
 const lastTradeResponse = await client.getLastTrade({
   ticker: 'AAPL'
@@ -134,6 +151,35 @@ function MyComponent() {
     }
   };
 
+  const fetchGexData = async () => {
+    try {
+      const response = await jax.getGex({
+        underlyingAsset: 'AAPL',
+        startStrikePrice: 150,
+        endStrikePrice: 200
+      });
+      
+      // Handle the response
+      console.log('Spot price:', response.getSpotPrice());
+    } catch (error) {
+      console.error('Error fetching GEX data:', error);
+    }
+  };
+
+  const fetchGexByStrikes = async () => {
+    try {
+      const response = await jax.getGexByStrikes({
+        underlyingAsset: 'AAPL',
+        numStrikes: 5  // Returns 5 strikes centered around spot price
+      });
+      
+      // Handle the response
+      console.log('Spot price:', response.getSpotPrice());
+    } catch (error) {
+      console.error('Error fetching GEX data:', error);
+    }
+  };
+
   const fetchLastTrade = async () => {
     try {
       const response = await jax.getLastTrade({
@@ -159,6 +205,12 @@ function MyComponent() {
       <button onClick={fetchDexByStrikes}>
         Fetch DEX Data by Strikes
       </button>
+      <button onClick={fetchGexData}>
+        Fetch GEX Data
+      </button>
+      <button onClick={fetchGexByStrikes}>
+        Fetch GEX Data by Strikes
+      </button>
       <button onClick={fetchLastTrade}>
         Fetch Last Trade
       </button>
@@ -169,9 +221,9 @@ function MyComponent() {
 
 ## Response Structures
 
-### DEX Response
+### DEX/GEX Response
 
-The response from `getDex` and `getDexByStrikes` contains the following structure:
+The response from `getDex`, `getDexByStrikes`, `getGex`, and `getGexByStrikes` contains the following structure:
 
 ```typescript
 interface DexResponse {
@@ -188,7 +240,7 @@ interface OptionTypeMap {
 }
 
 interface DexValue {
-  getValue(): number;
+  getValue(): number;  // DEX or GEX value depending on the endpoint
 }
 ```
 

@@ -109,6 +109,106 @@ describe('JaxClient Integration Tests', () => {
     });
   });
 
+  describe('GEX API', () => {
+    it('should fetch GEX data for AAPL', async () => {
+      const response = await client.getGex({
+        underlyingAsset: 'AAPL',
+        startStrikePrice: 150,
+        endStrikePrice: 200
+      });
+
+      expect(response).toBeDefined();
+      expect(response.getSpotPrice()).toBeGreaterThan(0);
+      
+      const strikePrices = response.getStrikePricesMap();
+      const strikePriceKeys = Array.from(strikePrices.keys());
+      expect(strikePriceKeys.length).toBeGreaterThan(0);
+      
+      // Get first strike price entry
+      const firstStrike = strikePriceKeys[0];
+      const expDates = strikePrices.get(firstStrike)?.getExpirationDatesMap();
+      expect(expDates).toBeDefined();
+      const expDateKeys = Array.from(expDates!.keys());
+      expect(expDateKeys.length).toBeGreaterThan(0);
+      
+      // Get first expiration date entry
+      const firstExpDate = expDateKeys[0];
+      const optionTypes = expDates!.get(firstExpDate)?.getOptionTypesMap();
+      expect(optionTypes).toBeDefined();
+      expect(Array.from(optionTypes!.keys()).includes('call')).toBe(true);
+      expect(Array.from(optionTypes!.keys()).includes('put')).toBe(true);
+      
+      // Verify gamma values exist (we don't make assumptions about their range)
+      const callGamma = optionTypes!.get('call')?.getValue();
+      const putGamma = optionTypes!.get('put')?.getValue();
+      expect(callGamma).toBeDefined();
+      expect(putGamma).toBeDefined();
+      expect(typeof callGamma).toBe('number');
+      expect(typeof putGamma).toBe('number');
+    }, 30000); // Increase timeout for real API call
+
+    it('should fetch GEX data by number of strikes for AAPL', async () => {
+      const response = await client.getGexByStrikes({
+        underlyingAsset: 'AAPL',
+        numStrikes: 5
+      });
+
+      expect(response).toBeDefined();
+      expect(response.getSpotPrice()).toBeGreaterThan(0);
+      
+      const strikePrices = response.getStrikePricesMap();
+      const strikePriceKeys = Array.from(strikePrices.keys());
+      expect(strikePriceKeys.length).toBe(5); // Should have exactly 5 strikes
+      
+      // Get first strike price entry
+      const firstStrike = strikePriceKeys[0];
+      const expDates = strikePrices.get(firstStrike)?.getExpirationDatesMap();
+      expect(expDates).toBeDefined();
+      const expDateKeys = Array.from(expDates!.keys());
+      expect(expDateKeys.length).toBeGreaterThan(0);
+      
+      // Get first expiration date entry
+      const firstExpDate = expDateKeys[0];
+      const optionTypes = expDates!.get(firstExpDate)?.getOptionTypesMap();
+      expect(optionTypes).toBeDefined();
+      expect(Array.from(optionTypes!.keys()).includes('call')).toBe(true);
+      expect(Array.from(optionTypes!.keys()).includes('put')).toBe(true);
+      
+      // Verify gamma values exist (we don't make assumptions about their range)
+      const callGamma = optionTypes!.get('call')?.getValue();
+      const putGamma = optionTypes!.get('put')?.getValue();
+      expect(callGamma).toBeDefined();
+      expect(putGamma).toBeDefined();
+      expect(typeof callGamma).toBe('number');
+      expect(typeof putGamma).toBe('number');
+    }, 30000); // Increase timeout for real API call
+
+    it('should handle invalid asset requests', async () => {
+      const response = await client.getGex({
+        underlyingAsset: 'INVALID',
+        startStrikePrice: 150,
+        endStrikePrice: 200
+      });
+
+      // Verify that we get an empty response for invalid assets
+      expect(response).toBeDefined();
+      const strikePriceKeys = Array.from(response.getStrikePricesMap().keys());
+      expect(strikePriceKeys.length).toBe(0);
+    });
+
+    it('should handle invalid number of strikes', async () => {
+      try {
+        await client.getGexByStrikes({
+          underlyingAsset: 'AAPL',
+          numStrikes: 4 // Even number should fail
+        });
+        fail('Should have thrown an error for even number of strikes');
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
+    });
+  });
+
   describe('Last Trade API', () => {
     it('should fetch last trade data for AAPL', async () => {
       const response = await client.getLastTrade({

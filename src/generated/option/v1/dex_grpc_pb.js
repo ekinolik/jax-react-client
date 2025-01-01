@@ -38,7 +38,7 @@ function deserialize_jax_v1_GetDexResponse(buffer_arg) {
 }
 
 
-// OptionService provides endpoints for delta exposure calculations
+// OptionService provides endpoints for delta and gamma exposure calculations
 var OptionServiceService = exports.OptionServiceService = {
   // GetDex returns the delta exposure calculations for given parameters
 getDex: {
@@ -55,6 +55,30 @@ getDex: {
   // GetDexByStrikes returns the delta exposure calculations for a specified number of strikes around the spot price
 getDexByStrikes: {
     path: '/jax.v1.OptionService/GetDexByStrikes',
+    requestStream: false,
+    responseStream: false,
+    requestType: option_v1_dex_pb.GetDexByStrikesRequest,
+    responseType: option_v1_dex_pb.GetDexResponse,
+    requestSerialize: serialize_jax_v1_GetDexByStrikesRequest,
+    requestDeserialize: deserialize_jax_v1_GetDexByStrikesRequest,
+    responseSerialize: serialize_jax_v1_GetDexResponse,
+    responseDeserialize: deserialize_jax_v1_GetDexResponse,
+  },
+  // GetGex returns the gamma exposure calculations for given parameters
+getGex: {
+    path: '/jax.v1.OptionService/GetGex',
+    requestStream: false,
+    responseStream: false,
+    requestType: option_v1_dex_pb.GetDexRequest,
+    responseType: option_v1_dex_pb.GetDexResponse,
+    requestSerialize: serialize_jax_v1_GetDexRequest,
+    requestDeserialize: deserialize_jax_v1_GetDexRequest,
+    responseSerialize: serialize_jax_v1_GetDexResponse,
+    responseDeserialize: deserialize_jax_v1_GetDexResponse,
+  },
+  // GetGexByStrikes returns the gamma exposure calculations for a specified number of strikes around the spot price
+getGexByStrikes: {
+    path: '/jax.v1.OptionService/GetGexByStrikes',
     requestStream: false,
     responseStream: false,
     requestType: option_v1_dex_pb.GetDexByStrikesRequest,

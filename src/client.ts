@@ -23,6 +23,17 @@ export interface GetDexByStrikesParams {
   numStrikes: number;
 }
 
+export interface GetGexParams {
+  underlyingAsset: string;
+  startStrikePrice?: number;
+  endStrikePrice?: number;
+}
+
+export interface GetGexByStrikesParams {
+  underlyingAsset: string;
+  numStrikes: number;
+}
+
 export class JaxClient {
   private optionClient: InstanceType<typeof OptionServiceClient>;
   private marketClient: InstanceType<typeof MarketServiceClient>;
@@ -84,6 +95,44 @@ export class JaxClient {
       });
     });
   }
+
+  async getGex(params: GetGexParams): Promise<GetDexResponse> {
+    const request = new GetDexRequest();
+    request.setUnderlyingAsset(params.underlyingAsset);
+    
+    if (params.startStrikePrice !== undefined) {
+      request.setStartStrikePrice(params.startStrikePrice);
+    }
+    if (params.endStrikePrice !== undefined) {
+      request.setEndStrikePrice(params.endStrikePrice);
+    }
+
+    return new Promise((resolve, reject) => {
+      this.optionClient.getGex(request, {}, (err, response) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(response);
+      });
+    });
+  }
+
+  async getGexByStrikes(params: GetGexByStrikesParams): Promise<GetDexResponse> {
+    const request = new GetDexByStrikesRequest();
+    request.setUnderlyingAsset(params.underlyingAsset);
+    request.setNumStrikes(params.numStrikes);
+
+    return new Promise((resolve, reject) => {
+      this.optionClient.getGexByStrikes(request, {}, (err, response) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(response);
+      });
+    });
+  }
 }
 
 // React hook for using the JAX client
@@ -93,6 +142,8 @@ export function useJaxClient(options: ClientOptions) {
   return {
     getDex: (params: GetDexParams) => client.getDex(params),
     getDexByStrikes: (params: GetDexByStrikesParams) => client.getDexByStrikes(params),
+    getGex: (params: GetGexParams) => client.getGex(params),
+    getGexByStrikes: (params: GetGexByStrikesParams) => client.getGexByStrikes(params),
     getLastTrade: (params: GetLastTradeParams) => client.getLastTrade(params),
   };
 } 
