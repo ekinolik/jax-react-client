@@ -1,7 +1,7 @@
 import * as grpc from '@grpc/grpc-js';
-import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/option/v1/dex_pb';
+import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/option/v1/option_pb';
 import { GetLastTradeRequest, GetLastTradeResponse } from './generated/market/v1/market_pb';
-import { OptionServiceClient } from './generated/option/v1/dex_grpc_pb';
+import { OptionServiceClient } from './generated/option/v1/option_grpc_pb';
 import { MarketServiceClient } from './generated/market/v1/market_grpc_pb';
 
 export interface ClientOptions {
@@ -55,9 +55,13 @@ export class JaxClient {
     }
 
     return new Promise((resolve, reject) => {
-      this.optionClient.getDex(request, {}, (err, response) => {
+      this.optionClient.getDex(request, (err, response) => {
         if (err) {
           reject(err);
+          return;
+        }
+        if (!response) {
+          reject(new Error('No response received'));
           return;
         }
         resolve(response);
@@ -70,9 +74,13 @@ export class JaxClient {
     request.setTicker(params.ticker);
 
     return new Promise((resolve, reject) => {
-      this.marketClient.getLastTrade(request, {}, (err, response) => {
+      this.marketClient.getLastTrade(request, (err, response) => {
         if (err) {
           reject(err);
+          return;
+        }
+        if (!response) {
+          reject(new Error('No response received'));
           return;
         }
         resolve(response);
@@ -86,9 +94,13 @@ export class JaxClient {
     request.setNumStrikes(params.numStrikes);
 
     return new Promise((resolve, reject) => {
-      this.optionClient.getDexByStrikes(request, {}, (err, response) => {
+      this.optionClient.getDexByStrikes(request, (err, response) => {
         if (err) {
           reject(err);
+          return;
+        }
+        if (!response) {
+          reject(new Error('No response received'));
           return;
         }
         resolve(response);
@@ -108,9 +120,13 @@ export class JaxClient {
     }
 
     return new Promise((resolve, reject) => {
-      this.optionClient.getGex(request, {}, (err, response) => {
+      this.optionClient.getGex(request, (err, response) => {
         if (err) {
           reject(err);
+          return;
+        }
+        if (!response) {
+          reject(new Error('No response received'));
           return;
         }
         resolve(response);
@@ -124,9 +140,13 @@ export class JaxClient {
     request.setNumStrikes(params.numStrikes);
 
     return new Promise((resolve, reject) => {
-      this.optionClient.getGexByStrikes(request, {}, (err, response) => {
+      this.optionClient.getGexByStrikes(request, (err, response) => {
         if (err) {
           reject(err);
+          return;
+        }
+        if (!response) {
+          reject(new Error('No response received'));
           return;
         }
         resolve(response);

@@ -1,4 +1,4 @@
-// source: option/v1/dex.proto
+// source: option/v1/option.proto
 /**
  * @fileoverview
  * @enhanceable
@@ -13,13 +13,13 @@
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+var global = (function() {
+  if (this) { return this; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  if (typeof self !== 'undefined') { return self; }
+  return Function('return this')();
+}.call(null));
 
 goog.exportSymbol('proto.jax.v1.DexValue', null, global);
 goog.exportSymbol('proto.jax.v1.ExpirationDateMap', null, global);
@@ -185,9 +185,9 @@ proto.jax.v1.GetDexRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.jax.v1.GetDexRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-underlyingAsset: jspb.Message.getFieldWithDefault(msg, 1, ""),
-startStrikePrice: (f = jspb.Message.getOptionalFloatingPointField(msg, 2)) == null ? undefined : f,
-endStrikePrice: (f = jspb.Message.getOptionalFloatingPointField(msg, 3)) == null ? undefined : f
+    underlyingAsset: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    startStrikePrice: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+    endStrikePrice: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0)
   };
 
   if (includeInstance) {
@@ -411,8 +411,8 @@ proto.jax.v1.GetDexByStrikesRequest.prototype.toObject = function(opt_includeIns
  */
 proto.jax.v1.GetDexByStrikesRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-underlyingAsset: jspb.Message.getFieldWithDefault(msg, 1, ""),
-numStrikes: jspb.Message.getFieldWithDefault(msg, 2, 0)
+    underlyingAsset: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    numStrikes: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -571,8 +571,8 @@ proto.jax.v1.GetDexResponse.prototype.toObject = function(opt_includeInstance) {
  */
 proto.jax.v1.GetDexResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-spotPrice: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-strikePricesMap: (f = msg.getStrikePricesMap()) ? f.toObject(includeInstance, proto.jax.v1.ExpirationDateMap.toObject) : []
+    spotPrice: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+    strikePricesMap: (f = msg.getStrikePricesMap()) ? f.toObject(includeInstance, proto.jax.v1.ExpirationDateMap.toObject) : []
   };
 
   if (includeInstance) {
@@ -699,8 +699,7 @@ proto.jax.v1.GetDexResponse.prototype.getStrikePricesMap = function(opt_noLazyCr
  */
 proto.jax.v1.GetDexResponse.prototype.clearStrikePricesMap = function() {
   this.getStrikePricesMap().clear();
-  return this;
-};
+  return this;};
 
 
 
@@ -735,7 +734,7 @@ proto.jax.v1.ExpirationDateMap.prototype.toObject = function(opt_includeInstance
  */
 proto.jax.v1.ExpirationDateMap.toObject = function(includeInstance, msg) {
   var f, obj = {
-expirationDatesMap: (f = msg.getExpirationDatesMap()) ? f.toObject(includeInstance, proto.jax.v1.OptionTypeMap.toObject) : []
+    expirationDatesMap: (f = msg.getExpirationDatesMap()) ? f.toObject(includeInstance, proto.jax.v1.OptionTypeMap.toObject) : []
   };
 
   if (includeInstance) {
@@ -833,8 +832,7 @@ proto.jax.v1.ExpirationDateMap.prototype.getExpirationDatesMap = function(opt_no
  */
 proto.jax.v1.ExpirationDateMap.prototype.clearExpirationDatesMap = function() {
   this.getExpirationDatesMap().clear();
-  return this;
-};
+  return this;};
 
 
 
@@ -869,7 +867,7 @@ proto.jax.v1.OptionTypeMap.prototype.toObject = function(opt_includeInstance) {
  */
 proto.jax.v1.OptionTypeMap.toObject = function(includeInstance, msg) {
   var f, obj = {
-optionTypesMap: (f = msg.getOptionTypesMap()) ? f.toObject(includeInstance, proto.jax.v1.DexValue.toObject) : []
+    optionTypesMap: (f = msg.getOptionTypesMap()) ? f.toObject(includeInstance, proto.jax.v1.DexValue.toObject) : []
   };
 
   if (includeInstance) {
@@ -967,8 +965,7 @@ proto.jax.v1.OptionTypeMap.prototype.getOptionTypesMap = function(opt_noLazyCrea
  */
 proto.jax.v1.OptionTypeMap.prototype.clearOptionTypesMap = function() {
   this.getOptionTypesMap().clear();
-  return this;
-};
+  return this;};
 
 
 
@@ -1003,7 +1000,7 @@ proto.jax.v1.DexValue.prototype.toObject = function(opt_includeInstance) {
  */
 proto.jax.v1.DexValue.toObject = function(includeInstance, msg) {
   var f, obj = {
-value: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0)
+    value: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0)
   };
 
   if (includeInstance) {

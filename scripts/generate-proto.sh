@@ -1,24 +1,24 @@
 #!/bin/bash
 
-# Create the output directory
-mkdir -p src/generated
+# Create necessary directories
+mkdir -p ./src/generated
 
 # Clean up existing generated files
-rm -rf src/generated/*
+rm -rf ./src/generated/*
 
 # Generate JavaScript code
-protoc \
+grpc_tools_node_protoc \
+  --js_out=import_style=commonjs:./src/generated \
+  --grpc_out=grpc_js:./src/generated \
   --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin` \
-  --js_out=import_style=commonjs:src/generated \
-  --grpc_out=grpc_js:src/generated \
   -I ../../api/proto \
-  ../../api/proto/option/v1/dex.proto \
+  ../../api/proto/option/v1/option.proto \
   ../../api/proto/market/v1/market.proto
 
 # Generate TypeScript definitions
-protoc \
+grpc_tools_node_protoc \
   --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts \
-  --ts_out=src/generated \
+  --ts_out=grpc_js:./src/generated \
   -I ../../api/proto \
-  ../../api/proto/option/v1/dex.proto \
+  ../../api/proto/option/v1/option.proto \
   ../../api/proto/market/v1/market.proto 

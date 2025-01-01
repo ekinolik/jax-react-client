@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useJaxClient } from '../client';
-import { GetDexResponse, ExpirationDateMap, OptionTypeMap, DexValue } from '../generated/option/v1/dex_pb';
+import { GetDexResponse } from '../generated/option/v1/option_pb';
 
 interface DexViewerProps {
   host: string;

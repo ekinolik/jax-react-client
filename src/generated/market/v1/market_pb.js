@@ -13,13 +13,13 @@
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+var global = (function() {
+  if (this) { return this; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  if (typeof self !== 'undefined') { return self; }
+  return Function('return this')();
+}.call(null));
 
 goog.exportSymbol('proto.jax.v1.GetLastTradeRequest', null, global);
 goog.exportSymbol('proto.jax.v1.GetLastTradeResponse', null, global);
@@ -97,7 +97,7 @@ proto.jax.v1.GetLastTradeRequest.prototype.toObject = function(opt_includeInstan
  */
 proto.jax.v1.GetLastTradeRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-ticker: jspb.Message.getFieldWithDefault(msg, 1, "")
+    ticker: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -227,10 +227,10 @@ proto.jax.v1.GetLastTradeResponse.prototype.toObject = function(opt_includeInsta
  */
 proto.jax.v1.GetLastTradeResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-price: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-size: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
-exchange: jspb.Message.getFieldWithDefault(msg, 4, "")
+    price: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+    size: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    exchange: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
