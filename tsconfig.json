@@ -13,8 +13,9 @@
     "moduleResolution": "node",
     "allowJs": true,
     "noImplicitAny": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*", "src/cache/**/*"],
+  "include": ["src/**/*", "src/cache/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]
 } 

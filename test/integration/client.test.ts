@@ -1,3 +1,4 @@
+import '@jest/globals';
 import { JaxClient } from '../../src/client';
 
 describe('JaxClient Integration Tests', () => {
