@@ -1,12 +1,20 @@
 import '@jest/globals';
 import { JaxClient } from '../../src/client';
+import * as path from 'path';
 
 describe('JaxClient Integration Tests', () => {
   let client: JaxClient;
 
   beforeAll(() => {
+    const certsDir = path.join(__dirname, 'certs');
     client = new JaxClient({
-      host: 'localhost:50051'
+      host: 'localhost:50051',
+      useTLS: true,
+      certPaths: {
+        ca: path.join(certsDir, 'ca.crt'),
+        cert: path.join(certsDir, 'client.crt'),
+        key: path.join(certsDir, 'client.key')
+      }
     });
   });
 

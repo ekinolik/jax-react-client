@@ -21,8 +21,9 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run generate && npm run build",
     "test": "jest",
-    "test:integration": "jest --config jest.integration.config.js",
-    "pretest:integration": "npm run generate && npm run build"
+    "setup:test-certs": "chmod +x ./scripts/setup-test-certs.sh && ./scripts/setup-test-certs.sh",
+    "pretest:integration": "npm run generate && npm run build && npm run setup:test-certs",
+    "test:integration": "jest --config jest.integration.config.js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.9.13",

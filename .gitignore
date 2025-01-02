@@ -135,3 +135,8 @@ clients/react/node_modules/
 clients/reach/.DS_Store
 
 grpcurl-test-commands.sh
+
+*.crt
+*.key
+*.pem
+test/integration/certs/

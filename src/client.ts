@@ -1,4 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
+import * as fs from 'fs';
 import { GetDexRequest, GetDexResponse, GetDexByStrikesRequest } from './generated/option/v1/option_pb';
 import { GetLastTradeRequest, GetLastTradeResponse } from './generated/market/v1/market_pb';
 import { OptionServiceClient } from './generated/option/v1/option_grpc_pb';
@@ -6,6 +7,12 @@ import { MarketServiceClient } from './generated/market/v1/market_grpc_pb';
 
 export interface ClientOptions {
   host: string;
+  useTLS?: boolean;
+  certPaths?: {
+    ca: string;
+    cert: string;
+    key: string;
+  };
 }
 
 export interface GetDexParams {
@@ -39,8 +46,24 @@ export class JaxClient {
   private marketClient: InstanceType<typeof MarketServiceClient>;
 
   constructor(options: ClientOptions) {
-    this.optionClient = new OptionServiceClient(options.host, grpc.credentials.createInsecure());
-    this.marketClient = new MarketServiceClient(options.host, grpc.credentials.createInsecure());
+    let credentials: grpc.ChannelCredentials;
+
+    if (options.useTLS && options.certPaths) {
+      const rootCert = fs.readFileSync(options.certPaths.ca);
+      const clientCert = fs.readFileSync(options.certPaths.cert);
+      const clientKey = fs.readFileSync(options.certPaths.key);
+
+      credentials = grpc.credentials.createSsl(
+        rootCert,
+        clientKey,
+        clientCert
+      );
+    } else {
+      credentials = grpc.credentials.createInsecure();
+    }
+
+    this.optionClient = new OptionServiceClient(options.host, credentials);
+    this.marketClient = new MarketServiceClient(options.host, credentials);
   }
 
   async getDex(params: GetDexParams): Promise<GetDexResponse> {

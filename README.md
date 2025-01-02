@@ -310,3 +310,81 @@ The client interacts with the server's caching mechanism:
 - Server caches last trade data for 1 second by default
 - Cache duration is configurable via server's `JAX_MARKET_CACHE_TTL` environment variable
 - No client-side caching for last trade data to ensure freshness
+
+## Using mTLS Authentication
+
+The client supports mutual TLS (mTLS) authentication. To use it:
+
+1. Request client certificates from your JAX server administrator. They will provide you with three files:
+   - `ca.crt`: The Certificate Authority (CA) certificate
+   - `client.crt`: Your client certificate
+   - `client.key`: Your client private key
+
+2. Create a directory in your project for the certificates:
+```bash
+mkdir -p certs
+```
+
+3. Copy the certificate files to your project, ensuring secure handling of the private key:
+```bash
+# Example - adjust paths according to where you received the files
+cp /path/to/received/ca.crt certs/
+cp /path/to/received/client.crt certs/
+cp /path/to/received/client.key certs/
+
+# Set proper permissions
+chmod 600 certs/client.key
+chmod 644 certs/ca.crt certs/client.crt
+```
+
+4. Initialize the client with the certificate paths:
+```typescript
+const client = new JaxClient({
+  host: 'your-server:50051',
+  useTLS: true,
+  certPaths: {
+    ca: './certs/ca.crt',
+    cert: './certs/client.crt',
+    key: './certs/client.key'
+  }
+});
+```
+
+### Security Notes
+
+1. Never commit certificates or private keys to version control
+2. Keep your client private key secure and never share it
+3. Use environment variables or a secure secret management system for certificate paths in production
+4. Ensure certificates are properly secured with appropriate file permissions
+5. Request new certificates from your server administrator when they expire
+
+### Development Environment
+
+For development environments, you might want to add the certificate paths to your `.env` file:
+
+```bash
+JAX_CA_CERT=./certs/ca.crt
+JAX_CLIENT_CERT=./certs/client.crt
+JAX_CLIENT_KEY=./certs/client.key
+```
+
+Then use them in your client initialization:
+```typescript
+const client = new JaxClient({
+  host: process.env.JAX_HOST || 'localhost:50051',
+  useTLS: true,
+  certPaths: {
+    ca: process.env.JAX_CA_CERT!,
+    cert: process.env.JAX_CLIENT_CERT!,
+    key: process.env.JAX_CLIENT_KEY!
+  }
+});
+```
+
+Remember to add these paths to your `.gitignore`:
+```
+# Certificate files
+certs/
+*.crt
+*.key
+```
